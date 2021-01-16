@@ -1,7 +1,9 @@
 # causal_ccm
 Package implementing Convergent Cross Mapping for causality inference in dynamical systems as defined by [Sugihara et al (2012)](https://science.sciencemag.org/content/338/6106/496)
 
-See `usage_sample.ipynb` for an example usage.
+## Example usage
+See https://github.com/PrinceJavier/causal_ccm/blob/main/usage_sample.ipynb for an example how to use.
+<br>Source code: https://github.com/PrinceJavier/causal_ccm
 
 ## To install
 `pip install causal-ccm`
@@ -12,6 +14,9 @@ Say we want to check if X drives Y. We first define `ccm` using:
 * `tau` - time lag (if `tau=1` we get `[t, t-1, t-2...]` as our shadow manifold embedding
 * `E` - embedding dimension (default=2) for the shadow manifold
 * `L` - time horizon to consider, defaults at length of time series X
+
+We import the package
+<br>`from causal_ccm.causal_ccm import ccm`
 
 We define `ccm`:
 <br>`ccm1 = ccm(X, Y, tau, E, L) # define ccm with X, Y time series `
