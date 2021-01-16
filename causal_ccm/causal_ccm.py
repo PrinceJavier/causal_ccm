@@ -1,5 +1,21 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.spatial import distance
+from scipy.stats import pearsonr
+
 class ccm:
-    def __init__(self, X, Y, tau=1, E=2, L=500):
+    """
+    We're checking causality X -> Y       
+    Args
+        X: timeseries for variable X that could cause Y
+        Y: timeseries for variable Y that could be caused by X
+        tau: time lag. default = 1
+        E: shadow manifold embedding dimension. default = 2
+        L: time period/duration to consider (longer = more data). default = length of X
+    """
+    def __init__(self, X, Y, tau=1, E=2, L=None):
         '''
         X: timeseries for variable X that could cause Y
         Y: timeseries for variable Y that could be caused by X
@@ -12,7 +28,10 @@ class ccm:
         self.Y = Y
         self.tau = tau
         self.E = E
-        self.L = L
+        if L == None:
+            self.L = len(X)
+        else:
+            self.L = L
         self.My = self.shadow_manifold(Y) # shadow manifold for Y (we want to know if info from X is in Y)
         self.t_steps, self.dists = self.get_distances(self.My) # for distances between points in manifold
 
@@ -111,7 +130,7 @@ class ccm:
         Args:
             None
         Returns:
-            correl: how much self.X causes self.Y. correlation between predicted Y and true Y
+            (r, p): how much self.X causes self.Y. as a correlation between predicted Y and true Y and the p-value (significance)
         '''
 
         # run over all timesteps in M
@@ -144,8 +163,8 @@ class ccm:
 
             X_lag, Y_lag = [], []
             for t in range(1, len(self.X)):
-                X_lag.append(X[t-tau])
-                Y_lag.append(Y[t-tau])
+                X_lag.append(self.X[t-self.tau])
+                Y_lag.append(self.Y[t-self.tau])
             X_t, Y_t = self.X[1:], self.Y[1:] # remove first value
 
             ax.scatter(X_t, X_lag, s=5, label='$M_x$')
@@ -169,7 +188,7 @@ class ccm:
                 Ma_t = Ma[t]
                 near_t_A, near_d_A = self.get_nearest_distances(t, t_steps_A, dists_A)
 
-                for i in range(E+1):
+                for i in range(self.E+1):
                     # points on Ma
                     A_t = Ma[near_t_A[i]][0]
                     A_lag = Ma[near_t_A[i]][1]
@@ -183,7 +202,7 @@ class ccm:
                     # connections
                     ax.plot([A_t, B_t], [A_lag, B_lag], c='r', linestyle=':')
 
-            ax.set_title(f'{cm_direction} cross mapping. time lag, tau = {tau}, E = 2')
+            ax.set_title(f'{cm_direction} cross mapping. time lag, tau = {self.tau}, E = 2')
             ax.legend(prop={'size': 14})
 
             ax.set_xlabel('$X_t$, $Y_t$', size=15)
