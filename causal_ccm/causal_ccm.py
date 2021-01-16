@@ -1,10 +1,3 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.spatial import distance
-from scipy.stats import pearsonr
-
 class ccm:
     def __init__(self, X, Y, tau=1, E=2, L=500):
         '''
@@ -19,10 +12,10 @@ class ccm:
         self.Y = Y
         self.tau = tau
         self.E = E
-        self.L = L        
+        self.L = L
         self.My = self.shadow_manifold(Y) # shadow manifold for Y (we want to know if info from X is in Y)
-        self.t_steps, self.dists = self.get_distances(self.My) # for distances between points in manifold   
-        
+        self.t_steps, self.dists = self.get_distances(self.My) # for distances between points in manifold
+
     def shadow_manifold(self, X):
         """
         Given
@@ -38,10 +31,10 @@ class ccm:
         for t in range((self.E-1) * self.tau, self.L):
             x_lag = [] # lagged values
             for t2 in range(0, self.E-1 + 1): # get lags, we add 1 to E-1 because we want to include E
-                x_lag.append(X[t-t2*self.tau])            
+                x_lag.append(X[t-t2*self.tau])
             M[t] = x_lag
         return M
-    
+
     # get pairwise distances between vectors in X
     def get_distances(self, Mx):
         """
@@ -58,16 +51,16 @@ class ccm:
         t_vec = [(k, v) for k,v in Mx.items()]
         t_steps = np.array([i[0] for i in t_vec])
         vecs = np.array([i[1] for i in t_vec])
-        dists = distance.cdist(vecs, vecs)    
+        dists = distance.cdist(vecs, vecs)
         return t_steps, dists
-    
+
     def get_nearest_distances(self, t, t_steps, dists):
         """
         Args:
             t: timestep of vector whose nearest neighbors we want to compute
             t_teps: time steps of all vectors in Mx, output of get_distances()
             dists: distance matrix showing distance of each vector (row) from other vectors (columns). output of get_distances()
-            E: embedding dimension of shadow manifold Mx 
+            E: embedding dimension of shadow manifold Mx
         Returns:
             nearest_timesteps: array of timesteps of E+1 vectors that are nearest to vector at time t
             nearest_distances: array of distances corresponding to vectors closest to vector at time t
@@ -77,8 +70,8 @@ class ccm:
 
         # get top closest vectors
         nearest_inds = np.argsort(dist_t)[1:self.E+1 + 1] # get indices sorted, we exclude 0 which is distance from itself
-        nearest_timesteps = t_steps[nearest_inds] # index column-wise, t_steps are same column and row-wise 
-        nearest_distances = dist_t[nearest_inds]  
+        nearest_timesteps = t_steps[nearest_inds] # index column-wise, t_steps are same column and row-wise
+        nearest_distances = dist_t[nearest_inds]
 
         return nearest_timesteps, nearest_distances
 
@@ -92,8 +85,8 @@ class ccm:
         """
         eps = 0.000001 # epsilon minimum distance possible
         t_ind = np.where(self.t_steps == t) # get the index of time t
-        dist_t = self.dists[t_ind].squeeze() # distances from vector at time t (this is one row)    
-        nearest_timesteps, nearest_distances = self.get_nearest_distances(t, self.t_steps, self.dists)    
+        dist_t = self.dists[t_ind].squeeze() # distances from vector at time t (this is one row)
+        nearest_timesteps, nearest_distances = self.get_nearest_distances(t, self.t_steps, self.dists)
 
         # get weights
         u = np.exp(-nearest_distances/np.max([eps, nearest_distances[0]])) # we divide by the closest distance to scale
@@ -106,7 +99,7 @@ class ccm:
 
     #     DEBUGGING
     #     will need to check why nearest_distances become nan
-    #     if np.isnan(X_hat):  
+    #     if np.isnan(X_hat):
     #         print(nearest_timesteps)
     #         print(nearest_distances)
 
@@ -123,27 +116,27 @@ class ccm:
 
         # run over all timesteps in M
         # X causes Y, we can predict X using My
-        # X puts some info into Y that we can use to reverse engineer X from Y        
+        # X puts some info into Y that we can use to reverse engineer X from Y
         X_true_list = []
         X_hat_list = []
 
         for t in list(self.My.keys()): # for each time step in My
             X_true, X_hat = self.predict(t) # predict X from My
             X_true_list.append(X_true)
-            X_hat_list.append(X_hat) 
+            X_hat_list.append(X_hat)
 
         x, y = X_true_list, X_hat_list
-        r, p = pearsonr(x, y)        
+        r, p = pearsonr(x, y)
 
         return r, p
-    
+
     def visualize_cross_mapping(self):
         """
         Visualize the shadow manifolds and some cross mappings
         """
         # we want to check cross mapping from Mx to My and My to Mx
 
-        f, axs = plt.subplots(1, 2, figsize=(12, 6))        
+        f, axs = plt.subplots(1, 2, figsize=(12, 6))
 
         for i, ax in zip((0, 1), axs): # i will be used in switching Mx and My in Cross Mapping visualization
             #===============================================
@@ -152,7 +145,7 @@ class ccm:
             X_lag, Y_lag = [], []
             for t in range(1, len(self.X)):
                 X_lag.append(X[t-tau])
-                Y_lag.append(Y[t-tau])    
+                Y_lag.append(Y[t-tau])
             X_t, Y_t = self.X[1:], self.Y[1:] # remove first value
 
             ax.scatter(X_t, X_lag, s=5, label='$M_x$')
@@ -185,18 +178,18 @@ class ccm:
                     # corresponding points on Mb
                     B_t = Mb[near_t_A[i]][0]
                     B_lag = Mb[near_t_A[i]][1]
-                    ax.scatter(B_t, B_lag, c='r', marker='*', s=50)  
+                    ax.scatter(B_t, B_lag, c='r', marker='*', s=50)
 
                     # connections
-                    ax.plot([A_t, B_t], [A_lag, B_lag], c='r', linestyle=':') 
+                    ax.plot([A_t, B_t], [A_lag, B_lag], c='r', linestyle=':')
 
             ax.set_title(f'{cm_direction} cross mapping. time lag, tau = {tau}, E = 2')
             ax.legend(prop={'size': 14})
 
             ax.set_xlabel('$X_t$, $Y_t$', size=15)
-            ax.set_ylabel('$X_{t-1}$, $Y_{t-1}$', size=15)               
-        plt.show()           
-        
+            ax.set_ylabel('$X_{t-1}$, $Y_{t-1}$', size=15)
+        plt.show()
+
     def plot_ccm_correls(self):
         """
         Args
@@ -212,7 +205,7 @@ class ccm:
         for t in range(self.tau, self.L):
             true, pred = self.predict(t)
             X_My_true.append(true)
-            X_My_pred.append(pred)    
+            X_My_pred.append(pred)
 
         # predicting X from My
         r, p = np.round(pearsonr(X_My_true, X_My_pred), 4)
@@ -221,6 +214,5 @@ class ccm:
         plt.xlabel('$X(t)$ (observed)', size=15)
         plt.ylabel('$\hat{X}(t)|M_y$ (estimated)', size=15)
         plt.title(f'tau={self.tau}, E={self.E}, L={self.L}, Correlation coeff = {r}')
-        
+
         plt.show()
-        
