@@ -1,5 +1,3 @@
-# Computing "Causality" (Correlation between True and Predictions)
-
 class ccm:
     def __init__(self, X, Y, tau=1, E=2, L=500):
         '''
@@ -28,7 +26,7 @@ class ccm:
         Returns
             {t:[t, t-tau, t-2*tau ... t-(E-1)*tau]} = Shadow attractor manifold, dictionary of vectors
         """
-        X = X[:L] # make sure we cut at L
+        X = X[:self.L] # make sure we cut at L
         M = {t:[] for t in range((self.E-1) * self.tau, self.L)} # shadow manifold
         for t in range((self.E-1) * self.tau, self.L):
             x_lag = [] # lagged values
@@ -201,45 +199,21 @@ class ccm:
             E: shadow manifold embedding dimension
             L: time duration
         Returns
-            None. Just correlation plots
+            None. Just correlation plots between predicted Y|M_x and true Y
         """
-        M = self.shadow_manifold(self.Y) # shadow manifold
-        t_steps, dists = self.get_distances(M) # for distances
-
-        ccm_XY = ccm(X, Y, tau, E, L) # define new ccm object # Testing for X -> Y
-        ccm_YX = ccm(Y, X, tau, E, L) # define new ccm object # Testing for Y -> X
-
-        X_My_true, X_My_pred = [], [] # note pred X | My is equivalent to figuring out if X -> Y
-        Y_Mx_true, Y_Mx_pred = [], [] # note pred Y | Mx is equivalent to figuring out if Y -> X
-
-        for t in range(tau, L):
-            true, pred = ccm_XY.predict(t)
+        X_My_true, X_My_pred = [], []
+        for t in range(self.tau, self.L):
+            true, pred = self.predict(t)
             X_My_true.append(true)
             X_My_pred.append(pred)    
 
-            true, pred = ccm_YX.predict(t)
-            Y_Mx_true.append(true)
-            Y_Mx_pred.append(pred)        
-
-        # # plot
-        figs, axs = plt.subplots(1, 2, figsize=(12, 5))
-
         # predicting X from My
-    #     coeff = np.round(np.corrcoef(X_My_true, X_My_pred)[0][1], 2)
         r, p = np.round(pearsonr(X_My_true, X_My_pred), 4)
 
-        axs[0].scatter(X_My_true, X_My_pred, s=10)
-        axs[0].set_xlabel('$X(t)$ (observed)', size=15)
-        axs[0].set_ylabel('$\hat{X}(t)|M_y$ (estimated)', size=15)
-        axs[0].set_title(f'tau={tau}, E={E}, L={L}, Correlation coeff = {r}')
-
-        # predicting Y from Mx
-    #     coeff = np.round(np.corrcoef(Y_Mx_true, Y_Mx_pred)[0][1], 2)
-        r, p = np.round(pearsonr(Y_Mx_true, Y_Mx_pred), 4)
-
-        axs[1].scatter(Y_Mx_true, Y_Mx_pred, s=10)
-        axs[1].set_xlabel('$Y(t)$ (observed)', size=15)
-        axs[1].set_ylabel('$\hat{Y}(t)|M_x$ (estimated)', size=15)
-        axs[1].set_title(f'tau={tau}, E={E}, L={L}, Correlation coeff = {r}')
+        plt.scatter(X_My_true, X_My_pred, s=10)
+        plt.xlabel('$X(t)$ (observed)', size=15)
+        plt.ylabel('$\hat{X}(t)|M_y$ (estimated)', size=15)
+        plt.title(f'tau={self.tau}, E={self.E}, L={self.L}, Correlation coeff = {r}')
+        
         plt.show()
         
