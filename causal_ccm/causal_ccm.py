@@ -35,39 +35,39 @@ class ccm:
         self.My = self.shadow_manifold(Y) # shadow manifold for Y (we want to know if info from X is in Y)
         self.t_steps, self.dists = self.get_distances(self.My) # for distances between points in manifold
 
-    def shadow_manifold(self, X):
+    def shadow_manifold(self, V):
         """
         Given
-            X: some time series vector
+            V: some time series vector
             tau: lag step
             E: shadow manifold embedding dimension
             L: max time step to consider - 1 (starts from 0)
         Returns
             {t:[t, t-tau, t-2*tau ... t-(E-1)*tau]} = Shadow attractor manifold, dictionary of vectors
         """
-        X = X[:self.L] # make sure we cut at L
+        V = V[:self.L] # make sure we cut at L
         M = {t:[] for t in range((self.E-1) * self.tau, self.L)} # shadow manifold
         for t in range((self.E-1) * self.tau, self.L):
-            x_lag = [] # lagged values
+            v_lag = [] # lagged values
             for t2 in range(0, self.E-1 + 1): # get lags, we add 1 to E-1 because we want to include E
-                x_lag.append(X[t-t2*self.tau])
-            M[t] = x_lag
+                v_lag.append(V[t-t2*self.tau])
+            M[t] = v_lag
         return M
 
-    # get pairwise distances between vectors in X
-    def get_distances(self, Mx):
+    # get pairwise distances between vectors in the time series
+    def get_distances(self, M):
         """
         Args
-            Mx: The shadow manifold from X
+            M: The shadow manifold from the time series
         Returns
             t_steps: timesteps
             dists: n x n matrix showing distances of each vector at t_step (rows) from other vectors (columns)
         """
 
-        # we extract the time indices and vectors from the manifold Mx
+        # we extract the time indices and vectors from the manifold M
         # we just want to be safe and convert the dictionary to a tuple (time, vector)
         # to preserve the time inds when we separate them
-        t_vec = [(k, v) for k,v in Mx.items()]
+        t_vec = [(k, v) for k,v in M.items()]
         t_steps = np.array([i[0] for i in t_vec])
         vecs = np.array([i[1] for i in t_vec])
         dists = distance.cdist(vecs, vecs)
@@ -77,9 +77,9 @@ class ccm:
         """
         Args:
             t: timestep of vector whose nearest neighbors we want to compute
-            t_teps: time steps of all vectors in Mx, output of get_distances()
+            t_teps: time steps of all vectors in the manifold M, output of get_distances()
             dists: distance matrix showing distance of each vector (row) from other vectors (columns). output of get_distances()
-            E: embedding dimension of shadow manifold Mx
+            E: embedding dimension of shadow manifold M
         Returns:
             nearest_timesteps: array of timesteps of E+1 vectors that are nearest to vector at time t
             nearest_distances: array of distances corresponding to vectors closest to vector at time t
@@ -97,10 +97,10 @@ class ccm:
     def predict(self, t):
         """
         Args
-            t: timestep at Mx to predict Y at same time step
+            t: timestep at manifold of y, My, to predict X at same time step
         Returns
-            Y_true: the true value of Y at time t
-            Y_hat: the predicted value of Y at time t using Mx
+            X_true: the true value of X at time t
+            X_hat: the predicted value of X at time t using the manifold My
         """
         eps = 0.000001 # epsilon minimum distance possible
         t_ind = np.where(self.t_steps == t) # get the index of time t
@@ -130,12 +130,12 @@ class ccm:
         Args:
             None
         Returns:
-            (r, p): how much self.X causes self.Y. as a correlation between predicted Y and true Y and the p-value (significance)
+            (r, p): how much X causes Y. as a correlation between predicted X and true X and the p-value (significance)
         '''
 
         # run over all timesteps in M
         # X causes Y, we can predict X using My
-        # X puts some info into Y that we can use to reverse engineer X from Y
+        # X puts some info into Y that we can use to reverse engineer X from Y via My
         X_true_list = []
         X_hat_list = []
 
@@ -218,7 +218,7 @@ class ccm:
             E: shadow manifold embedding dimension
             L: time duration
         Returns
-            None. Just correlation plots between predicted Y|M_x and true Y
+            None. Just correlation plots between predicted X|M_y and true X
         """
         X_My_true, X_My_pred = [], []
         for t in range(self.tau, self.L):
