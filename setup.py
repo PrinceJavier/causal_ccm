@@ -16,7 +16,7 @@ setup(
   author = 'Prince Javier',                   # Type in your name
   author_email = 'othepjavier@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/PrinceJavier/causal_ccm',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/PrinceJavier/causal_ccm/archive/v_033.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/PrinceJavier/causal_ccm/archive/refs/tags/v_033.tar.gz'
   keywords = ['causality', 'dynamical systems', 'complex systems'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'numpy',
