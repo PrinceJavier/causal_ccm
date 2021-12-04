@@ -33,5 +33,12 @@ We visualize correlation of X->Y
 
 Finally, we can check convergence in predictions (correlations) by computing `ccm1.causality()` for `ccm1` defined with different L values.
 
-
+If this package helped you in your work, pls. cite:
+@software{Javier_causal-ccm_a_Python_2021,
+author = {Javier, Prince Joseph Erneszer},
+month = {6},
+title = {{causal-ccm a Python implementation of Convergent Cross Mapping}},
+version = {0.3.3},
+year = {2021}
+}
 
