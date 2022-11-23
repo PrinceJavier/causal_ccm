@@ -221,7 +221,7 @@ class ccm:
             None. Just correlation plots between predicted X|M_y and true X
         """
         X_My_true, X_My_pred = [], []
-        for t in range(self.tau, self.L):
+        for t in range((self.E-1) * self.tau, self.L):
             true, pred = self.predict(t)
             X_My_true.append(true)
             X_My_pred.append(pred)
