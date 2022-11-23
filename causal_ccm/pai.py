@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.spatial import distance
 from scipy.stats import pearsonr
+from causal_ccm import ccm
+
+class pai(ccm):
+    
+    def __init__(self, X, Y, tau=1, E=2, L=None):
+        super().__init__(X, Y, tau, E, L)
 
 class ccm:
     """
