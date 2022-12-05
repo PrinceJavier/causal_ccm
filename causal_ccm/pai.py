@@ -14,7 +14,7 @@ class pai(ccm):
         Y: timeseries for variable Y that could be caused by X
         tau: time lag, assumed equal for both X and Y manifolds
         E: shadow manifold embedding dimension of X, derived from manifold_pattern[0]
-        Ey: shadow manifold embedding dimension of Y, derived from manifold_pattern[1], Ey should be >= E
+        Ey: shadow manifold embedding dimension of Y, derived from manifold_pattern[1], Ey should be <= E
         manifold_pattern: a list of 2 lists that contains the lag vectors for X and Y shadow manifolds.
             For example, manifold_pattern=[[0, -1, -2],[0]], tau=2 is the same as the shadow manifold 
             (X_t, X_{t-1*2}, X_{t-2*2}, Y_t).
