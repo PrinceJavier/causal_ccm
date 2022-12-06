@@ -33,6 +33,10 @@ We visualize correlation of X->Y
 
 Finally, we can check convergence in predictions (correlations) by computing `ccm1.causality()` for `ccm1` defined with different L values.
 
+### Additional Feature (PAI)
+
+The pai class implements the Pairwise Asymmetric Inference (see McCracken (2014)). The major difference of pai to ccm is the shadow manifold used to predict `X`. To create the manifold, use the `manifold_pattern` and `tau` parameters. For example, `manifold_pattern=[[0, -1, -2],[0]], tau=2` is the same as the shadow manifold `(X_t, X_{t-1*2}, X_{t-2*2}, Y_t)`.
+
 If this package helped you in your work, pls. cite:
 ```
 @software{Javier_causal-ccm_a_Python_2021,
