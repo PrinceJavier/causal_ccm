@@ -5,6 +5,7 @@ import seaborn as sns
 from scipy.spatial import distance
 from scipy.stats import pearsonr
 from causal_ccm import ccm
+from sklearn.decomposition import PCA
 
 class pai(ccm):
     
