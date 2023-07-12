@@ -8,7 +8,7 @@ print(long_description)
 setup(
   name = 'causal_ccm',         # How you named your package folder (MyLib)
   packages = ['causal_ccm'],   # Chose the same as "name"
-  version = '0.3.3',      # updated the docstrings where X and Y were switched
+  version = '0.4.0',      # add new feature: PAI method
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'implementation of convergent cross mapping by Sugihara et al (2012)',
   long_description=long_description,
