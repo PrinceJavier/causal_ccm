@@ -37,6 +37,29 @@ Finally, we can check convergence in predictions (correlations) by computing `cc
 
 The pai class implements the Pairwise Asymmetric Inference (see McCracken (2014)). The major difference of pai to ccm is the shadow manifold used to predict `X`. To create the manifold, use the `manifold_pattern` and `tau` parameters. For example, `manifold_pattern=[[0, -1, -2],[0]], tau=2` is the same as the shadow manifold `(X_t, X_{t-1*2}, X_{t-2*2}, Y_t)`.
 
+```
+from causal_ccm.pai import pai
+
+tau = 1 # time lag
+manifold_pattern=[[0, -1, -2],[0]]
+L = len(X) # length of time period to consider
+
+pai_XY = pai(X, Y, tau, manifold_pattern, L)
+
+# Check correlation plot
+# causality X -> Y
+# returns: (correlation ("strength" of causality), p-value(significance))
+pai_XY.causality()
+```
+
+### Validation
+
+These are the results of `causal-ccm` compared with the results in the paper [Sugihara et al (2012)](https://science.sciencemag.org/content/338/6106/496).
+
+![results_1](./images/results_1.png)
+![results_2](./images/results_2.png)
+
+### Citation
 If this package helped you in your work, pls. cite:
 ```
 @software{Javier_causal-ccm_a_Python_2021,
